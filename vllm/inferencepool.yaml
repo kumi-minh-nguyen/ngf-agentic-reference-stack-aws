@@ -1,0 +1,19 @@
+---
+# Source: inferencepool/templates/inferencepool.yaml
+apiVersion: "inference.networking.k8s.io/v1"
+kind: InferencePool
+metadata:
+  name: vllm-model
+  labels:
+    app.kubernetes.io/name: vllm-model-epp
+    app.kubernetes.io/version: "v1.1.0"
+spec:
+  targetPorts:
+    - number: 8000
+  selector:
+    matchLabels:
+      app: "vllm-model"
+  endpointPickerRef:
+    name: vllm-model-epp
+    port:
+      number: 9002

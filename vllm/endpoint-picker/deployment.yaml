@@ -1,0 +1,84 @@
+# Source: inferencepool/templates/epp-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-model-epp
+  labels:
+    app.kubernetes.io/name: vllm-model-epp
+    app.kubernetes.io/version: "v1.1.0"
+spec:
+  replicas: 1
+  strategy:
+    # The current recommended EPP deployment pattern is to have a single active replica. This ensures
+    # optimal performance of the stateful operations such prefix cache aware scorer.
+    # The Recreate strategy the old replica is killed immediately, and allow the new replica(s) to
+    # quickly take over. This is particularly important in the high availability set up with leader
+    # election, as the rolling update strategy would prevent the old leader being killed because
+    # otherwise the maxUnavailable would be 100%.
+    type: Recreate
+  selector:
+    matchLabels:
+      inferencepool: vllm-model-epp
+  template:
+    metadata:
+      labels:
+        inferencepool: vllm-model-epp
+    spec:
+      serviceAccountName: vllm-model-epp
+      # Conservatively, this timeout should mirror the longest grace period of the pods within the pool
+      terminationGracePeriodSeconds: 130
+      containers:
+        - name: epp
+          image: registry.k8s.io/gateway-api-inference-extension/epp:v1.3.0
+          imagePullPolicy: Always
+          args:
+            - --pool-name
+            - vllm-model
+            # The pool namespace is optional because EPP can default to the NAMESPACE env var.
+            # We still keep this here so that the template works with older versions of EPP, or other
+            # distros of EPP which may not have implemented the NAMESPACE env var defaulting behavior.
+            # - --pool-namespace
+            # - default
+            - --pool-group
+            - "inference.networking.k8s.io"
+            - --zap-encoder
+            - "json"
+            - --config-file
+            - "/config/default-plugins.yaml"
+            # Pass additional flags via the inferenceExtension.flags field in values.yaml.
+            - "--v"
+            - "1"
+            - "--tracing"
+            - "false"
+            - --metrics-endpoint-auth=false
+          ports:
+            - name: grpc
+              containerPort: 9002
+            - name: grpc-health
+              containerPort: 9003
+            - name: metrics
+              containerPort: 8080
+          livenessProbe:
+            grpc:
+              port: 9003
+              service: inference-extension
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            grpc:
+              port: 9003
+              service: inference-extension
+            periodSeconds: 2
+
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: plugins-config-volume
+              mountPath: "/config"
+      volumes:
+        - name: plugins-config-volume
+          configMap:
+            name: vllm-model-epp

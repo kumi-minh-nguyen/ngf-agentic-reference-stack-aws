@@ -1,0 +1,21 @@
+# Source: inferencepool/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "vllm-model-default-epp"
+  labels:
+    app.kubernetes.io/name: vllm-model-epp
+    app.kubernetes.io/version: "v1.1.0"
+rules:
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create

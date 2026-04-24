@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: openai-proxy
+          image: leonseng/openai-proxy-with-f5-guardrails:0.8.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OPENAI_API_URL
+              value: "http://inference-gateway-nginx.nginx-gateway:8000/v1"
+            - name: MODEL
+              value: "Qwen/Qwen2.5-3B-Instruct"
+            - name: DEBUG
+              value: "true"

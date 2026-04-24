@@ -1,0 +1,13 @@
+# Source: inferencepool/templates/rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "vllm-model-default-epp"
+subjects:
+  - kind: ServiceAccount
+    name: vllm-model-epp
+    namespace: vllm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "vllm-model-default-epp"

@@ -1,0 +1,19 @@
+# Source: inferencepool/templates/epp-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-model-epp
+  labels:
+    app.kubernetes.io/name: vllm-model-epp
+    app.kubernetes.io/version: "v1.1.0"
+spec:
+  selector:
+    inferencepool: vllm-model-epp
+  ports:
+    - name: grpc-ext-proc
+      protocol: TCP
+      port: 9002
+    - name: http-metrics
+      protocol: TCP
+      port: 8080
+  type: ClusterIP

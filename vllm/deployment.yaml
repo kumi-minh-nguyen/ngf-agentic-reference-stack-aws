@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-model
+spec:
+  replicas: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: vllm-model
+  template:
+    metadata:
+      labels:
+        app: vllm-model
+    spec:
+      nodeSelector:
+        role: gpu
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:v0.6.6
+          args:
+            - --model
+            - Qwen/Qwen2.5-3B-Instruct
+            - --port
+            - "8000"
+            - --max-model-len
+            - "4096"
+            - --enforce-eager
+            - --gpu-memory-utilization
+            - "0.85"
+            - --dtype
+            - half
+          env:
+            - name: HUGGING_FACE_HUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hf-token
+                  key: token
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 30
