@@ -9,9 +9,7 @@ The whole setup runs in AWS, with company SSO login. Deployment scripts and test
 > This demo is loosely based on the idea from [leonseng/ngf-agentic-reference-stack](https://github.com/leonseng/ngf-agentic-reference-stack/blob/main/docs/deployment.md).
 
 **Traffic flow:**
-```
 ![End to end flow](ngf-agentic-aws-flow.png)
-```
 
 The EPP intelligently routes each request to the optimal vLLM pod based on
 real-time metrics: queue depth, KV cache utilization, and prefix cache hits.
