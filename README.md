@@ -31,7 +31,7 @@ aws configure sso
 
 You will be prompted for:
 - SSO start URL: provided by your AWS admin
-- SSO region: your AWS region (e.g. `ap-southeast-1`)
+- SSO region: your AWS SSO region, not project region (e.g. `us-east-1`)
 - Account ID: your AWS account ID
 - Role name: your SSO role name
 
