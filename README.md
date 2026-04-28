@@ -10,7 +10,7 @@ The whole setup runs in AWS, with company SSO login. Deployment scripts and test
 
 **Traffic flow:**
 ```
-Browser → NGF Gateway → Endpoint Picker (EPP) → vLLM pods (GPU)
+![End to end flow](./ngf-agentic-aws-flow.png)
 ```
 
 The EPP intelligently routes each request to the optimal vLLM pod based on
